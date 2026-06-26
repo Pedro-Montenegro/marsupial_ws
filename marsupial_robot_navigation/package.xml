@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>marsupial_robot_navigation</name>
+  <version>0.0.1</version>
+  <description>Camada de navegação da frota Marsupial.</description>
+
+  <maintainer email="voce@marsupial.com">Marsupial</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>ament_index_python</depend>
+
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>pointcloud_to_laserscan</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

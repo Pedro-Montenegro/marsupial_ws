@@ -1,0 +1,21 @@
+odom_node:
+  ros__parameters:
+    wheel_radius: 0.082
+    wheel_base: 0.31
+
+    odom_frame: "odom"
+    base_frame: "base_link"
+
+    odom_topic: "wheel/odom"
+    cmd_vel_topic: "cmd_vel"
+    drive_status_topic: "ui/drive_status"
+
+    hz: 30.0
+    publish_tf: false
+    cmd_timeout: 0.5
+
+    can_channel: "can0"
+    can_dbc: "odrive-cansimple.dbc"
+
+    right_id: 0
+    left_id: 1

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>marsupial_robot_interfaces</name>
+  <version>0.0.1</version>
+  <description>Interfaces (actions) para o robô</description>
+  <maintainer email="marsupial@example.com">Marsupial</maintainer>
+  <license>MIT</license>
+
+  <!-- build tool -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- deps para gerar as interfaces -->
+  <build_depend>rosidl_default_generators</build_depend>
+  <build_depend>builtin_interfaces</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>action_msgs</build_depend>
+
+  <!-- deps em tempo de execução (para quem usa as interfaces em Python/C++) -->
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>action_msgs</exec_depend>
+
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

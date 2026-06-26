@@ -1,0 +1,49 @@
+amcl:
+  ros__parameters:
+    use_map_topic: true
+    first_map_only: false
+    global_frame_id: "map"
+    odom_frame_id:  "odom"
+    base_frame_id:  "base_link"
+    scan_topic:     "/scan"
+    tf_broadcast:   true
+    transform_tolerance: 0.3
+
+    # Permite recuperar de sequestro / máximos locais
+    recovery_alpha_slow: 0.0
+    recovery_alpha_fast: 0.0
+
+    # valores básicos (pode ajustar depois)
+    # min_particles: 1000
+    min_particles: 1000
+    # max_particles: 5000
+    max_particles: 3000
+    odom_model_type: "diff"
+    # alpha1: 0.03
+    alpha1: 0.06
+    alpha2: 0.03
+    alpha3: 0.05
+    # alpha4: 0.05
+    alpha4: 0.07
+    z_hit: 0.9
+    z_short: 0.05
+    z_max: 0.05
+    # z_rand: 0.05
+    z_rand: 0.10
+    # sigma_hit: 0.1
+    sigma_hit: 0.2
+    lambda_short: 0.05
+    # update_min_d: 0.2
+    update_min_d: 0.05
+    # update_min_a: 0.2
+    update_min_a: 0.05
+    resample_interval: 1
+    initial_pose:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
+
+map_server:
+  ros__parameters:
+    yaml_filename: ""

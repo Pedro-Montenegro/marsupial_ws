@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>marsupial_robot_localization</name>
+  <version>0.0.1</version>
+  <description>Camada de localização da frota Marsupial.</description>
+
+  <maintainer email="voce@marsupial.com">Marsupial</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>ament_index_python</depend>
+
+  <depend>rclpy</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_srvs</depend>
+
+  <exec_depend>robot_localization</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>nav2_amcl</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

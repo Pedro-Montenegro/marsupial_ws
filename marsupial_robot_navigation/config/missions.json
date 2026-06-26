@@ -1,0 +1,66 @@
+{
+  "poi1": [
+    { "type": "Speak", "text": "Olá! Iniciando rota para a recepção." },
+    { "type": "GoTo", "x": 8.5, "y": 7.0, "frame": "map", "tag": "recepcao" },
+    { "type": "Speak", "text": "Cheguei à recepção. Posso ajudar?" }
+  ],
+  "poi3": [
+    { "type": "Speak", "text": "Iniciando patrulha do Laboratório." },
+    {
+      "type": "Tour",
+      "waypoints": [
+        [2.0, 18.0],
+        [3.0, 8.0],
+        [4.0, 3.0],
+        [7.0, 3.0],
+        [8.5, 8.0],
+        [8.0, 15.0],
+        [4.0, 15.0]
+      ],
+      "frame": "map"
+    },
+    { "type": "Speak", "text": "Patrulha concluída." },
+    { "type": "ReturnHome" }
+  ],
+  "poi2": [
+    { "type": "Speak", "text": "Olá! Iniciando rota para a Estação de Trabalho." },
+    { "type": "GoTo", "x": 5.0, "y": 16.0, "frame": "map", "tag": "estacao" },
+    { "type": "Speak", "text": "Cheguei à Estação de Trabalho. Posso ajudar?" },
+    { "type": "AwaitCommand", "cmd": "RETURN", "label": "AT_STATION" }
+  ],
+  "poi4": [
+    { "type": "Speak", "text": "Iniciando patrulha reduzida do Laboratório." },
+    {
+      "type": "Tour",
+      "waypoints": [
+        [2.0, 18.0],
+        [3.0, 8.0],
+        [3.0, 7.0],
+        [8.0, 7.0],
+        [8.5, 8.0],
+        [8.0, 15.0],
+        [4.0, 15.0]
+      ],
+      "frame": "map"
+    },
+    { "type": "Speak", "text": "Patrulha concluída." },
+    { "type": "ReturnHome" }
+  ],
+  "poi5": [
+    { "type": "Speak", "text": "Iniciando testes carpete." },
+    {
+      "type": "Tour",
+      "waypoints": [
+        [7.0, 4.5],
+        [7.0, 3.2],
+        [3.0, 3.2],
+        [4.0, 6.5],
+        [5.0, 6.5],
+        [6.0, 3.0]
+      ],
+      "frame": "map"
+    },
+    { "type": "Speak", "text": "Patrulha concluída." },
+    { "type": "ReturnHome" }
+  ]
+}

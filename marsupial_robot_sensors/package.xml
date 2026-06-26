@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>marsupial_robot_sensors</name>
+  <version>0.0.1</version>
+  <description>Launches de sensores da frota Marsupial.</description>
+
+  <maintainer email="voce@marsupial.com">Marsupial</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>ament_index_python</depend>
+  <depend>tf2_ros</depend>
+
+  <exec_depend>python3</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

@@ -1,0 +1,42 @@
+odom_node_4wd:
+  ros__parameters:
+
+    # ── Geometria ────────────────────────────────────────────────────
+    # ATENÇÃO: valores placeholder — atualizar com medidas reais do robô 4WD.
+    wheel_radius: 0.082    # raio da roda em metros
+    wheel_base:   0.31     # distância entre centro das rodas esq/dir (track width)
+
+    # ── Identificação dos ODrives ─────────────────────────────────────
+    # Obtém o serial via odrivetool:
+    #   odrv0.serial_number       → inteiro
+    #   hex(odrv0.serial_number)  → "0x366f54483536"
+    # Informe sem o prefixo "0x", ex: "366f54483536"
+    # Deixe vazio SOMENTE para testes com um único ODrive conectado.
+    left_odrive_serial:  ""
+    right_odrive_serial: ""
+    usb_timeout: 15.0     # segundos aguardando conexão USB
+
+    # ── Mapeamento de eixos por ODrive ───────────────────────────────
+    # ODrive esquerdo: axis 0 = roda dianteira esq, axis 1 = roda traseira esq
+    # ODrive direito:  axis 0 = roda dianteira dir, axis 1 = roda traseira dir
+    left_front_axis:  0
+    left_rear_axis:   1
+    right_front_axis: 0
+    right_rear_axis:  1
+
+    # ── Sinal de direção dos motores ─────────────────────────────────
+    # Ajuste se as rodas andarem para o lado errado ao receber cmd_vel positivo.
+    # -1.0: motor montado invertido em relação à convenção (gira ao contrário)
+    #  1.0: motor montado no sentido normal
+    sign_left:  -1.0   # motores do lado esquerdo normalmente montados espelhados
+    sign_right:  1.0
+
+    # ── ROS ──────────────────────────────────────────────────────────
+    odom_frame: "odom"
+    base_frame: "base_link"
+    odom_topic:          "wheel/odom"
+    cmd_vel_topic:       "cmd_vel"
+    drive_status_topic:  "ui/drive_status"
+    hz:          30.0   # frequência do loop de odometria (Hz)
+    publish_tf:  false  # TF publicado por outro nó
+    cmd_timeout: 0.5    # segundos sem cmd_vel → para os motores (watchdog)

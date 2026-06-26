@@ -1,0 +1,11 @@
+# Goal
+nav_msgs/Path path
+---
+# Result
+bool success
+string message
+---
+# Feedback
+int32 current_index
+int32 total_points
+float64 remaining_distance
