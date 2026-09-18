@@ -42,6 +42,11 @@ install(TARGETS
   m1ct_d2
   DESTINATION lib/${PROJECT_NAME})
 
+# Disponibiliza os parâmetros para get_package_share_directory("m1ct_d2").
+install(DIRECTORY
+  params
+  DESTINATION share/${PROJECT_NAME})
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()

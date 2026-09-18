@@ -1,5 +1,11 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction, IncludeLaunchDescription
+from launch.actions import (
+    DeclareLaunchArgument,
+    GroupAction,
+    IncludeLaunchDescription,
+    TimerAction,
+)
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -9,65 +15,62 @@ import os
 
 def generate_launch_description():
     namespace = LaunchConfiguration("namespace")
+    enable_realsense = LaunchConfiguration("enable_realsense")
 
-    # ── RealSense D435i — config leve para navegação ──────────────────────
-    # Color desabilitado (não necessário para nav)
-    # Depth: 424x240 @ 15fps (suficiente para detecção de obstáculos)
-    # IMU unificado em /camera/camera/imu via unite_imu_method=1
-    # Point cloud desabilitado (pesado, substituído pelo depthimage_to_laserscan)
-    realsense_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory("realsense2_camera"),
-                "launch",
-                "rs_launch.py",
-            )
-        ),
-        launch_arguments={
-            "camera_name":           "camera",
-            "camera_namespace":      "camera",
-            "enable_color":          "false",
-            "enable_depth":          "true",
-            "depth_module.profile":  "424,240,15",
-            "enable_gyro":           "true",
-            "enable_accel":          "true",
-            "unite_imu_method":      "1",        # /camera/camera/imu
-            "pointcloud.enable":     "false",
-            "align_depth.enable":    "false",
-            "publish_tf":            "false",
-        }.items(),
+    # ── RealSense D435i — configuracao leve, somente IMU ────────────
+    # Todos os streams de imagem e filtros ficam desligados para minimizar CPU,
+    # memoria e trafego USB. Gyro + acelerometro alimentam /camera/camera/imu.
+    # rs_launch.py inspeciona todas as LaunchConfigurations visiveis. O grupo
+    # com escopo impede que argumentos do mapping/base sejam tratados como se
+    # fossem parametros da camera.
+    realsense_launch = GroupAction(
+        scoped=True,
+        forwarding=False,
+        condition=IfCondition(enable_realsense),
+        actions=[IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory("realsense2_camera"),
+                    "launch",
+                    "rs_launch.py",
+                )
+            ),
+            launch_arguments={
+                "camera_name":           "camera",
+                "camera_namespace":      "camera",
+                "enable_color":          "false",
+                "enable_depth":          "false",
+                "enable_infra":          "false",
+                "enable_infra1":         "false",
+                "enable_infra2":         "false",
+                "enable_gyro":           "true",
+                "enable_accel":          "true",
+                "unite_imu_method":      "1",        # /camera/camera/imu
+                "pointcloud.enable":     "false",
+                "align_depth.enable":    "false",
+                "enable_sync":           "false",
+                # Necessario para o EKF transformar os frames de gyro/accel
+                # (camera_gyro_optical_frame etc.) ate camera_link/base_link.
+                "publish_tf":            "true",
+            }.items(),
+        )],
     )
 
-    # ── depth → LaserScan virtual (obstáculos baixos não vistos pelo LiDAR) ─
-    depth_scan_node = Node(
-        package="depthimage_to_laserscan",
-        executable="depthimage_to_laserscan_node",
-        name="depth_to_scan",
+    # ── RPLIDAR A2 (sllidar) ────────────────────────────────────────────────
+    lidar_node = Node(
+        package="sllidar_ros2",
+        executable="sllidar_node",
+        name="sllidar_node",
         namespace=namespace,
         parameters=[{
-            "output_frame":  "camera_link",
-            "range_min":     0.15,
-            "range_max":     3.0,
-            "scan_height":   10,    # linhas centrais da imagem usadas
+            "channel_type": "serial",
+            "serial_port": "/dev/rplidar",
+            "serial_baudrate": 256000,
+            "frame_id": "laser_link",
+            "inverted": False,
+            "angle_compensate": True,
+            "scan_mode": "Sensitivity",
         }],
-        remappings=[
-            ("depth",             "/camera/camera/depth/image_rect_raw"),
-            ("depth_camera_info", "/camera/camera/depth/camera_info"),
-            ("scan",              "/depth/scan"),
-        ],
-        output="screen",
-    )
-
-    # ── M1CT_D2 LiDAR ────────────────────────────────────────────────────────
-    lidar_node = Node(
-        package="m1ct_d2",
-        executable="m1ct_d2",
-        name="m1ct_d2_node",
-        namespace=namespace,
-        parameters=[
-            os.path.join(get_package_share_directory("m1ct_d2"), "params", "m1ct_d2.yaml")
-        ],
-        remappings=[("scan_coin", "scan")],
         output="screen",
     )
 
@@ -106,9 +109,12 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument("namespace", default_value=""),
+        DeclareLaunchArgument(
+            "enable_realsense", default_value="false",
+            description="Desligar quando a RealSense ja estiver sendo usada por outro processo (ex: Isaac ROS VSLAM no container Docker).",
+        ),
         realsense_launch,
         lidar_node,
-        depth_scan_node,
         tf_static_delayed,
         ui_sensors,
     ])

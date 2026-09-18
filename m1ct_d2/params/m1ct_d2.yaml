@@ -1,6 +1,6 @@
 m1ct_d2_node:
   ros__parameters:
-    port: /dev/coin_d6
+    port: /dev/sc_mini
     frame_id: laser_link
     ignore_array: ""
     baudrate: 230400

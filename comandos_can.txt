@@ -1,0 +1,216 @@
+sudo slcand -o -c -s5 /dev/ttyACM1 slcan0
+sudo ip link set slcan0 up
+candump slcan0
+
+candump can0  # Em um terminal
+
+
+sudo dmesg | tail # Para verificar a porta
+
+##################################################
+sudo modprobe gs_usb
+
+sudo ip link set can0 down || true
+sudo ip link set can0 type can bitrate 250000 restart-ms 100
+sudo ip link set can0 txqueuelen 1000
+sudo ip link set can0 up
+
+ip -details link show can0
+
+sudo modprobe gs_usb
+
+sudo ip link set can1 down || true
+sudo ip link set can1 type can bitrate 250000 restart-ms 100
+sudo ip link set can1 txqueuelen 1000
+sudo ip link set can1 up
+
+ip -details link show can1
+######################################################
+
+######### comandos para navegacao #######################
+ros2 launch marsupial_robot_pkg_with_actions bringup_ekf_amcl.launch.py 
+
+ros2 launch marsupial_nav nav_stack.launch.py
+
+python3 goal_node.py #pasta marsupial_nav (temporario)
+
+ros2 run marsupial_robot_pkg_with_actions send_compute_path_once --ros-args \
+  --params-file /home/marsupial/ros2_ws/src/marsupial_robot_pkg_with_actions/config/compute_path_params.yaml
+
+################### RECUPERA CAN #######################################
+# 0) Garanta que ninguém está usando a porta
+sudo systemctl stop ModemManager  # (Jetson costuma ter esse cara pegando ttyACM)
+sudo pkill slcand
+sudo fuser -k /dev/ttyACM1 2>/dev/null
+
+# 1) Descubra qual ACM é o seu dongle CAN (e NÃO o ODrive/ZED)
+sudo dmesg | grep -E "ttyACM|ttyUSB" -n
+udevadm info -a -n /dev/ttyACM1 | egrep 'idVendor|idProduct|product|manufacturer'  # confirma fabricante
+
+# 2) Anexe o SLCAN (bitrate 250 kbit/s; -s5 = 250k; -o abre em modo raw)
+sudo slcand -o -s5 /dev/ttyACM2 slcan0     # note o "slcan0" no final!
+sleep 0.2
+sudo ip link set slcan0 up
+
+# 3) Teste
+candump slcan0
+########################## SERVICE ################################################
+- LOCALIZAÇÃO
+sudo systemctl daemon-reload
+sudo systemctl enable marsupial_bringup.service
+sudo systemctl start marsupial_bringup.service
+
+sudo systemctl disable marsupial_bringup.service
+
+Ver status / logs:
+systemctl status marsupial_bringup.service --no-pager
+journalctl -u marsupial_bringup.service -f
+
+sudo systemctl stop marsupial_bringup.service
+sudo systemctl stop marsupial_nav2.service
+
+- NAVEGAÇÃO
+sudo systemctl daemon-reload
+sudo systemctl enable marsupial_nav2.service
+sudo systemctl start marsupial_nav2.service
+
+journalctl -u marsupial_nav2.service -f
+
+
+#########################################################################
+rostopic pub -r 10 /cmd_vel geometry_msgs/Twist "
+linear:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+angular:
+  x: 0.0
+  y: 0.0
+  z: 0.2"
+
+rostopic pub -r 10 /cmd_vel geometry_msgs/Twist "
+linear:
+  x: 0.4
+  y: 0.0
+  z: 0.0
+angular:
+  x: 0.0
+  y: 0.0
+  z: 0.0"
+  
+ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i use_container:=false
+  
+ros2 launch marsupial_robot_pkg nav_stack.launch.py use_lidar:=true lidar_launch_file:=view_sllidar_a2m12_launch.py
+
+
+ros2 launch marsupial_robot_pkg nav_stack.launch.py use_lidar:=true lidar_launch_file:=sllidar_a2m12_launch.py
+
+----------------------------------------------------
+
+Comandos lançar slam_toolbox:
+
+ros2 launch zed_wrapper zed_camera.launch.py   camera_model:=zed2i use_container:=false   publish_tf:=true publish_map_tf:=false
+
+ros2 launch marsupial_robot_pkg wheel_odom.launch.py 
+ros2 launch marsupial_robot_pkg_nav2_new wheel_odom.launch.py 
+
+ros2 run robot_localization ekf_node \
+  --ros-args \
+  -r __node:=ekf_odom \
+  --params-file /home/marsupial/ros2_ws/src/marsupial_robot_pkg_nav2_new/config/ekf.yaml
+
+ros2 run tf2_ros static_transform_publisher   0 0 0  3.141592653589793 0 0  base_link zed_camera_link
+
+# base_link (PAI) deve vir antes de zed_camera_link (FILHO)
+ros2 run tf2_ros static_transform_publisher 0 0 0  1.57079632679 0 1.57079632679 base_link zed_camera_link
+
+ros2 run tf2_ros static_transform_publisher   0 0 0  3.141592653589793 0 0  zed_camera_link zed_imu_link
+
+ros2 launch sllidar_ros2 view_sllidar_a2m12_launch.py 
+
+ros2 run tf2_ros static_transform_publisher   0 0.19 0.24  3.141592653589793 0 0  base_link laser
+
+ros2 run tf2_ros static_transform_publisher   0 0.19 0.24  3.141592653589793 0 0  zed_camera_link laser
+
+marsupial@ubuntu:~/ros2_ws$ ros2 launch marsupial_robot_pkg online_slam.launch.py 
+
+ros2 launch marsupial_robot_pkg_nav2_new amcl_loc.launch.py
+
+ros2 launch nav2_bringup navigation_launch.py \
+  use_composition:=False use_sim_time:=false \
+  map:=/home/marsupial/maps/lab.yaml \
+  params_file:=/home/marsupial/ros2_ws/src/marsupial_robot_pkg/config/nav2_params.yaml
+
+
+------27/10/2025-----
+
+ros2 launch marsupial_robot_pkg_with_actions minimal_nav2_planner.launch.py \
+  params_file:=/home/marsupial/ros2_ws/src/marsupial_robot_pkg_with_actions/config/nav2_params_min.yaml use_sim_time:=false
+
+ros2 run marsupial_robot_pkg_with_actions send_compute_path_once --ros-args \
+  --params-file /home/marsupial/ros2_ws/src/marsupial_robot_pkg_with_actions/config/compute_path_params.yaml
+
+ros2 run marsupial_robot_pkg_with_actions goal_node
+
+ssh -X marsupial@172.18.0.163
+----------------------------------
+SALVAR MAPAS:
+
+marsupial@ubuntu:~/ros2_ws$ ros2 run nav2_map_server map_saver_cli -f ~/maps/Teste_Bradesco   --ros-args -p map_subscribe_transient_local:=true -p save_map_timeout:=10.0
+
+marsupial@ubuntu:~/ros2_ws$ ros2 service call /slam_toolbox/serialize_map   slam_toolbox/srv/SerializePoseGraph "{filename: '/home/marsupial/maps/Teste_Bradesco'}"
+
+
+ros2 run tf2_tools view_frames 
+
+TROQUEI ISSO: 02/10/2025
+            two_d_mode: true # Force navigation on a plane. If true the Z value will be fixed to 'fixed_z_value', roll and pitch to zero
+            
+ general:
+            camera_timeout_sec: 5
+            camera_max_reconnect: 5
+            camera_flip: true # aqui
+
+ros2 topic pub /goal geometry_msgs/msg/PoseStamped \
+"{header: {frame_id: 'map'}, pose: {position: {x: 1.0, y: 2.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.7071, w: 0.7071}}}" -1
+
+
+#############################################################################################
+ros2 topic pub --once /initialpose geometry_msgs/msg/PoseWithCovarianceStamped "{
+  header: {frame_id: map},
+  pose: {
+    pose: {
+      position: {x: 0.0, y: 0.0, z: 0.0},
+      orientation: {z: 0.0, w: 1.0}
+    },
+    covariance: [4.0, 0, 0, 0, 0, 0,
+                 0, 4.0, 0, 0, 0, 0,
+                 0, 0, 0.0, 0, 0, 0,
+                 0, 0, 0, 0.0, 0, 0,
+                 0, 0, 0, 0, 0.0, 0,
+                 0, 0, 0, 0, 0, 1.0]
+  }
+}"
+
+
+colcon build --merge-install
+
+ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+
+ros2 run marsupial_ui_bridge ui_bridge_node
+
+cd ~/marsupial-ui
+npm run dev -- --host 0.0.0.0 --port 5174
+
+# republish Image -> CompressedImage
+ros2 run image_transport republish raw in:=/zed/zed_node/rgb/image_rect_color compressed out:=/ui/zed/rgb
+
+marsupial@ubuntu:~$ ros2 run web_video_server web_video_server --ros-args -p address:=172.18.0.168 -p port:=8090
+
+sudo systemctl start marsupial-video.target
+
+ros2 run plotjuggler plotjuggler
+
+rm -rf build/ install/ log/
+
+ros2 run m1ct_d2 m1ct_d2

@@ -1,0 +1,39 @@
+odom_node_4wd_can:
+  ros__parameters:
+
+    # ── Geometria (mesma do robot_4wd.yaml — meça e ajuste se necessário) ──
+    wheel_radius: 0.082    # raio da roda em metros
+    wheel_base:   0.50     # distância centro a centro entre rodas esq/dir
+
+    # ── CAN ──────────────────────────────────────────────────────────
+    # can_channel: verifique com `readlink -f /sys/class/net/canX/device`
+    # antes de assumir o nome — troca entre boots (CANable2 vs mttcan nativo).
+    can_channel: "can0"
+    can_dbc: "odrive-cansimple.dbc"
+
+    # ── node_id por roda (validado em 2026-08-06) ──────────────────────
+    # ODrive direita: axis0(node_id=0)=RR  axis1(node_id=1)=FR
+    # ODrive esquerda: axis0(node_id=2)=FL axis1(node_id=3)=RL
+    fl_node_id: 2
+    rl_node_id: 3
+    fr_node_id: 1
+    rr_node_id: 0
+
+    right_disabled: false        # true = só o lado esquerdo ativo
+    right_front_disabled: false  # true = FR fica solta (workaround, ver USB)
+
+    # ── Sinal de direção dos motores (mesma convenção do robot_4wd.yaml) ──
+    sign_left:  -1.0
+    sign_right:  1.0
+
+    # ── ROS ──────────────────────────────────────────────────────────
+    odom_frame: "odom"
+    base_frame: "base_link"
+    odom_topic:          "wheel/odom"
+    cmd_vel_topic:       "cmd_vel"
+    drive_status_topic:  "ui/drive_status"
+    telemetry_topic:     "drive/telemetry"
+    hz:          30.0   # frequência do loop de odometria (Hz)
+    publish_tf:  false  # TF publicado por outro nó
+    cmd_timeout: 0.5
+    rtr_period:  0.025  # ~10 Hz por eixo com os 4 eixos ativos

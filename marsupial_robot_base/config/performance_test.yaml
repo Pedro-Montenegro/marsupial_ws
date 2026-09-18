@@ -1,0 +1,35 @@
+performance_logger:
+  ros__parameters:
+    run_name: "terrain_4wd"
+    output_root: "~/marsupial_test_results"
+    sample_hz: 50.0
+    cmd_vel_topic: "/cmd_vel"
+    wheel_odom_topic: "/wheel/odom"
+    reference_odom_topic: "/zed/zed_node/odom"
+    imu_topic: "/camera/camera/imu"
+    telemetry_topic: "/drive/telemetry"
+    drive_status_topic: "/ui/drive_status"
+    event_topic: "/performance_test/event"
+
+performance_test_runner:
+  ros__parameters:
+    armed: false
+    cmd_vel_topic: "/cmd_vel"
+    event_topic: "/performance_test/event"
+    publish_hz: 30.0
+    countdown_s: 5.0
+    stop_hold_s: 1.0
+    segments:
+      - "settle,2.0,0.0,0.0"
+      - "straight_slow,5.0,0.15,0.0"
+      - "stop_1,2.0,0.0,0.0"
+      - "straight_medium,5.0,0.25,0.0"
+      - "stop_2,2.0,0.0,0.0"
+      - "arc_left,6.0,0.18,0.25"
+      - "stop_3,2.0,0.0,0.0"
+      - "arc_right,6.0,0.18,-0.25"
+      - "stop_4,2.0,0.0,0.0"
+      - "pivot_left,4.0,0.0,0.20"
+      - "stop_5,2.0,0.0,0.0"
+      - "pivot_right,4.0,0.0,-0.20"
+      - "final_stop,2.0,0.0,0.0"

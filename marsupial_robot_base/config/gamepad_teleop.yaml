@@ -1,0 +1,35 @@
+joy_node:
+  ros__parameters:
+    device_id: 0
+    deadzone: 0.05
+    autorepeat_rate: 50.0
+    sticky_buttons: false
+    coalesce_interval_ms: 1
+
+gamepad_teleop:
+  ros__parameters:
+    joy_topic: "/joy"
+    cmd_vel_topic: "/cmd_vel"
+
+    # Mapeamento inicial Xbox/PS genérico:
+    # analógico esquerdo vertical = avanço/ré
+    # analógico esquerdo horizontal = curva
+    axis_linear: 1
+    axis_angular: 0
+    invert_linear: false
+    invert_angular: false
+
+    # Segure LB para habilitar; RB ativa o modo turbo.
+    deadman_button: 4
+    turbo_button: 5
+
+    linear_speed: 0.20
+    angular_speed: 0.30
+    turbo_linear_speed: 0.30
+    turbo_angular_speed: 0.45
+
+    deadzone: 0.12
+    max_linear_accel: 0.40
+    max_angular_accel: 0.80
+    joy_timeout: 0.50
+    publish_hz: 30.0

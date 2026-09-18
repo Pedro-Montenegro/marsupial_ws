@@ -353,9 +353,9 @@ int send_lidar_data(LaserScan &outscan)
 
 		outscan.config.angle_increment = (2.0*M_PI/count);
 		outscan.config.min_angle = 0;
-		outscan.config.max_angle = 2*M_PI;
+		outscan.config.max_angle = outscan.config.min_angle + outscan.config.angle_increment * (count - 1);
 		outscan.config.min_range = 0.10;
-		outscan.config.max_range = 3.0; //测量的最远距离是10m
+		outscan.config.max_range = 10.0; //测量的最远距离是10m
 		outscan.config.scan_time =  static_cast<float>(scan_time * 1.0 / 1e9);
     	outscan.config.time_increment = outscan.config.scan_time / (double)(count - 1);
 		outscan.stamp = node_lidar.lidar_time.scan_start_time;
@@ -392,10 +392,10 @@ int send_lidar_data(LaserScan &outscan)
 				point_check.range = range;
 				point_check.intensity = intensity;
 				
-				if(angle >= 300 || angle <= 60)
-				//if(true)
+				//if(angle >= 300 || angle <= 60)
+				if(true)
 					{
-						if(range <= 2.0)
+						if(range <= 10.0)
 						{
 							point.range = range;
 						}
@@ -433,7 +433,7 @@ int send_lidar_data(LaserScan &outscan)
 				node_lidar.optimize_lidar.PointCloudFilter(&outscan);
 			}
 
-
+			return 0;
 		}
 	}
 	node_lidar._lock.unlock();
@@ -639,8 +639,15 @@ int node_start(int argc, char **argv)
 		{
 			auto scan_msg = std::make_shared<sensor_msgs::msg::LaserScan>();
 
-			scan_msg->ranges.resize(scan.points.size());
-			scan_msg->intensities.resize(scan.points.size());
+			const size_t ranges_count = scan.points.size();
+			scan_msg->ranges.resize(ranges_count);
+			scan_msg->intensities.resize(ranges_count);
+			if (ranges_count > 1) {
+				scan.config.angle_increment = (2.0 * M_PI / ranges_count);
+				scan.config.min_angle = 0;
+				scan.config.max_angle = scan.config.min_angle + scan.config.angle_increment * (ranges_count - 1);
+				scan.config.time_increment = scan.config.scan_time / static_cast<double>(ranges_count - 1);
+			}
 
 			//scan_msg->header.stamp.sec = RCL_NS_TO_S(scan.stamp);;
 			//scan_msg->header.stamp.nanosec = scan.stamp - RCL_S_TO_NS(scan_msg->header.stamp.sec);

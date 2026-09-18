@@ -1,7 +1,7 @@
-odom_node:
+odom_node_usb:
   ros__parameters:
     wheel_radius: 0.082
-    wheel_base: 0.31
+    wheel_base: 0.50
 
     odom_frame: "odom"
     base_frame: "base_link"
@@ -17,5 +17,6 @@ odom_node:
     can_channel: "can0"
     can_dbc: "odrive-cansimple.dbc"
 
-    right_id: 0
-    left_id: 1
+    right_id: 1
+    left_id: 0
+    usb_timeout: 30.0

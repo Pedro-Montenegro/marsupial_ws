@@ -3,12 +3,19 @@ ros__parameters:
 
   realsense:
     camera_name: "camera"
-    camera_namespace: ""       # tópicos em /camera/...
+    camera_namespace: "camera" # tópicos em /camera/camera/...
+    enable_color: true
+    enable_depth: true
+    enable_infra: false
+    enable_infra1: false
+    enable_infra2: false
     enable_gyro: true
     enable_accel: true
-    unite_imu_method: 1        # 1=linear_interpolation → /camera/imu
+    unite_imu_method: 1        # 1=copy → /camera/camera/imu
+    pointcloud_enable: true
     align_depth_enable: true
-    publish_tf: false
+    enable_sync: false
+    publish_tf: true
 
   # Atualizar xyz com medidas reais do robô 4WD
   laser_tf:

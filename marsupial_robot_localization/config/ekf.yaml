@@ -12,7 +12,8 @@ ekf_odom:
     base_link_frame: base_link
 
     # ── Odometria das rodas ───────────────────────────────────────────────
-    # Funde apenas vx e wz (velocidades) — posição absoluta vem do AMCL
+    # Funde somente vx. Em skid-steer 4WD, o wz calculado pelos encoders fica
+    # muito contaminado pela derrapagem; a rotacao vem exclusivamente da IMU.
     odom0: wheel/odom
     odom0_queue_size: 10
     odom0_nodelay: true
@@ -21,14 +22,34 @@ ekf_odom:
     odom0_config: [ false, false, false,
                     false, false, false,
                     true,  false, false,
-                    false, false, true,
+                    false, false, false,
                     false, false, false ]
     odom0_pose_rejection_threshold: 3.0
     odom0_twist_rejection_threshold: 3.0
 
+    # ── VSLAM (Isaac ROS visual_slam, RealSense D435I estereo+IMU) ─────────
+    # Pose absoluta corrigida por visao (x, y, yaw). Diferente da IMU crua
+    # (que so da taxa e deriva sem correcao), o VSLAM ja funde estereo+IMU
+    # internamente e corrige deriva via tracking visual. Mantém wheel/odom
+    # (vx) e a IMU crua (wz) como estao, ja validados — isso soma uma
+    # correcao de pose absoluta por cima, nao substitui as fontes existentes.
+    odom1: /visual_slam/tracking/odometry
+    odom1_queue_size: 10
+    odom1_nodelay: true
+    odom1_differential: false
+    odom1_relative: false
+    odom1_config: [ true,  true,  false,
+                    false, false, true,
+                    false, false, false,
+                    false, false, false,
+                    false, false, false ]
+    odom1_pose_rejection_threshold: 3.0
+    odom1_twist_rejection_threshold: 3.0
+
     # ── IMU RealSense D435i ───────────────────────────────────────────────
     # /camera/imu requer unite_imu_method=1 no rs_launch.py
-    # Funde yaw (orientação) e wz (velocidade angular)
+    # A D435I publica gyro/acelerometro, mas nao fornece yaw absoluto.
+    # Fundimos wz; o EKF integra essa velocidade angular para estimar yaw.
     imu0: /camera/camera/imu
     imu0_queue_size: 10
     imu0_nodelay: true
@@ -36,7 +57,7 @@ ekf_odom:
     imu0_relative: false
     imu0_remove_gravity: true
     imu0_config: [ false, false, false,
-                   false, false, true,
+                   false, false, false,
                    false, false, false,
                    false, false, true,
                    false, false, false ]

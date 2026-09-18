@@ -1,5 +1,6 @@
 import odrive
 from odrive.enums import *
+import math
 import time
 
 # Hoverboard Kv
@@ -49,7 +50,9 @@ if odrv0:
 
     left_motor.encoder.config.mode = ENCODER_MODE_HALL
     left_motor.encoder.config.cpr = 90
-    left_motor.encoder.config.calib_scan_distance = 150
+    # Firmware 0.5.1 requer múltiplo de 4*pi para evitar
+    # ENCODER_ERROR_CPR_POLEPAIRS_MISMATCH na calibração Hall.
+    left_motor.encoder.config.calib_scan_distance = 48 * math.pi
     left_motor.encoder.config.bandwidth = 100
     left_motor.encoder.config.direction = -1
 
@@ -81,7 +84,7 @@ if odrv0:
     
     right_motor.encoder.config.mode = ENCODER_MODE_HALL
     right_motor.encoder.config.cpr = 90
-    right_motor.encoder.config.calib_scan_distance = 150
+    right_motor.encoder.config.calib_scan_distance = 48 * math.pi
     right_motor.encoder.config.bandwidth = 100
     right_motor.encoder.config.direction = 1
 

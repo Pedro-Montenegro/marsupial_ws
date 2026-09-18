@@ -96,7 +96,21 @@ int main(int argc, char **argv)
 	node_lidar.lidar_general_info.version = 4;
 	//node_lidar.laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1);
 	
-	parse_args(argc, argv);
+	// Os argumentos adicionados por launch_ros começam em "--ros-args" e
+	// pertencem ao rcl/rclcpp. O parser legado do driver não os reconhece e,
+	// além de imprimir erros, permuta argv, tornando a linha inválida para
+	// rclcpp::init(). Analise apenas as opções próprias anteriores a esse
+	// marcador e preserve argc/argv originais para o ROS 2.
+	int driver_argc = argc;
+	for (int i = 1; i < argc; ++i)
+	{
+		if (strcmp(argv[i], "--ros-args") == 0)
+		{
+			driver_argc = i;
+			break;
+		}
+	}
+	parse_args(driver_argc, argv);
 
 	node_start(argc, argv);
-}                                                                                                           
+}
